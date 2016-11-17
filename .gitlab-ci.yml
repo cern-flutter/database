@@ -4,6 +4,10 @@ stages:
     - build
     - release
 
+variables:
+    CONTAINER_BUILD_IMAGE: "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}"
+    CONTAINER_RELEASE_IMAGE: "${CI_REGISTRY_IMAGE}:latest"
+
 before_script:
     - docker login -p "${REGISTRY_PASSWD}" -u "${REGISTRY_USER}" "${CI_REGISTRY}"
 
@@ -13,14 +17,15 @@ after_script:
 build-image:
     stage: build
     script:
-        - docker build --pull --no-cache=true --rm=true -t "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}" .
-        - docker push "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}"
+        - docker build --pull --no-cache=true --rm=true -t "${CONTAINER_BUILD_IMAGE}"
+        - docker push "${CONTAINER_BUILD_IMAGE}"
 
 release-image:
     stage: release
     only:
         - master
     script:
-        - docker tag "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}" "${CI_REGISTRY_IMAGE}:latest"
-        - docker push "${CI_REGISTRY_IMAGE}:latest"
+        - docker pull "${CONTAINER_BUILD_IMAGE}"
+        - docker tag "${CONTAINER_BUILD_IMAGE}" "${CONTAINER_RELEASE_IMAGE}"
+        - docker push "${CONTAINER_RELEASE_IMAGE}"
 
