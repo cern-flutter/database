@@ -1,15 +1,26 @@
+image: docker:latest
+
 stages:
     - build
+    - release
+
+before_script:
+    - docker login -p "${REGISTRY_PASSWD}" -u "${REGISTRY_USER}" "${CI_REGISTRY}"
+
+after_script:
+    - docker logout "${CI_REGISTRY}"
 
 build-image:
-    image: docker:latest
     stage: build
-    before_script:
-        - docker info
-        - docker login -p "${REGISTRY_PASSWD}" -u "${REGISTRY_USER}" "${CI_REGISTRY}"
     script:
         - docker build --pull --no-cache=true --rm=true -t "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}" .
         - docker push "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}"
-    after_script:
-        - docker logout "${CI_REGISTRY}"
+
+release-image:
+    stage: release
+    only:
+        - master
+    script:
+        - docker tag "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}" "${CI_REGISTRY_IMAGE}:latest"
+        - docker push "${CI_REGISTRY_IMAGE}:latest"
 
