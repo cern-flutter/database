@@ -1,0 +1,15 @@
+stages:
+    - build
+
+build-image:
+    image: docker:latest
+    stage: build
+    before_script:
+        - docker info
+        - docker login -p "${REGISTRY_PASSWD}" -u "${REGISTRY_USER}" "${CI_REGISTRY}"
+    script:
+        - docker build --pull --no-cache=true --rm=true "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}" .
+        - docker push "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_NAME}"
+    after_script:
+        - docker logout "${CI_REGISTRY}"
+
