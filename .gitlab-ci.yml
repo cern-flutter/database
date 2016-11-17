@@ -17,7 +17,7 @@ after_script:
 build-image:
     stage: build
     script:
-        - docker build --pull --no-cache=true --rm=true -t "${CONTAINER_BUILD_IMAGE}"
+        - docker build --pull --no-cache=true --rm=true -t "${CONTAINER_BUILD_IMAGE}" .
         - docker push "${CONTAINER_BUILD_IMAGE}"
 
 release-image:
