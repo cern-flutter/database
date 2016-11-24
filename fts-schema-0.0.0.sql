@@ -18,18 +18,42 @@
 --
 
 CREATE TABLE t_x509_requests (
-    delegation_id CHAR(40) NOT NULL PRIMARY KEY,
+    delegation_id CHAR(40) NOT NULL,
+    user_dn       VARCHAR(255) NOT NULL,
     request       TEXT NOT NULL,
     private_key   TEXT NOT NULL,
-    voms_attrs    TEXT NOT NULL
+    voms_attrs    TEXT NOT NULL,
+    PRIMARY KEY(delegation_id, user_dn)
 );
 
 CREATE TABLE t_x509_proxies (
-    delegation_id    CHAR(40) NOT NULL PRIMARY KEY,
+    delegation_id    CHAR(40) NOT NULL,
     user_dn          VARCHAR(255) NOT NULL,
     termination_time TIMESTAMP WITHOUT TIME ZONE,
     voms_attrs       TEXT NOT NULL,
-    pem              TEXT NOT NULL
+    proxy            TEXT NOT NULL,
+    PRIMARY KEY(delegation_id, user_dn)
+);
+
+--
+-- Static authorization
+--
+CREATE TABLE t_authz_dn (
+    user_dn VARCHAR(255) NOT NULL,
+    operation VARCHAR(64) NOT NULL,
+    PRIMARY KEY(user_dn, operation)
+);
+
+--
+-- Banned DNs
+--
+CREATE TABLE t_bad_dns (
+    user_dn VARCHAR(255) NOT NULL PRIMARY KEY,
+    message VARCHAR(255),
+    addition_time TIMESTAMP WITHOUT TIME ZONE,
+    admin_dn VARCHAR(255),
+    status   CHAR(10),
+    wait_timeout INTEGER DEFAULT 0
 );
 
 --
